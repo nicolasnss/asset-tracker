@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: asset-tracker
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/asset_db
+    username: postgres
+    password: your_password # Coloque sua senha do Postgres aqui
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate # O Flyway cuidará da criação das tabelas
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
