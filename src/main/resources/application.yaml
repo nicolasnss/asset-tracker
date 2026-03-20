@@ -7,15 +7,23 @@ spring:
     username: postgres
     password: nico10
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 20000
 
   jpa:
     hibernate:
       ddl-auto: validate # O Flyway cuidará da criação das tabelas
-    show-sql: true
+    show-sql: true # Em produção, mude para false
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
     enabled: true
     baseline-on-migrate: true
+    locations: classpath:db/migration
