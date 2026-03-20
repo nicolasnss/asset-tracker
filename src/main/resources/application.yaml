@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/asset_db
     username: postgres
-    password: your_password # Coloque sua senha do Postgres aqui
+    password: nico10
     driver-class-name: org.postgresql.Driver
 
   jpa:
