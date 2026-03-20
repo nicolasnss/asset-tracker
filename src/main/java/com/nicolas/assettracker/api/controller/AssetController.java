@@ -2,6 +2,7 @@ package com.nicolas.assettracker.api.controller;
 
 import com.nicolas.assettracker.domain.entity.Asset;
 import com.nicolas.assettracker.domain.repository.AssetRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,8 @@ public class AssetController {
     }
 
     @PostMapping
-    public ResponseEntity<Asset> adicionar(@RequestBody Asset asset) {
+    // O @Valid garante que o objeto 'asset' seja validado antes de entrar no método
+    public ResponseEntity<Asset> adicionar(@Valid @RequestBody Asset asset) {
         Asset savedAsset = assetRepository.save(asset);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedAsset);
     }
@@ -30,12 +32,13 @@ public class AssetController {
     @GetMapping("/{id}")
     public ResponseEntity<Asset> buscarPorId(@PathVariable Long id) {
         return assetRepository.findById(id)
-                .map(asset -> ResponseEntity.ok(asset))
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Asset> atualizar(@PathVariable Long id, @RequestBody Asset asset) {
+    // Também validamos no PUT para evitar que alguém "limpe" um nome que já existia
+    public ResponseEntity<Asset> atualizar(@PathVariable Long id, @Valid @RequestBody Asset asset) {
         if (!assetRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -51,5 +54,10 @@ public class AssetController {
         }
         assetRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/status/{status}")
+    public List<Asset> filtrarPorStatus(@PathVariable String status) {
+        return assetRepository.findByStatus(status);
     }
 }

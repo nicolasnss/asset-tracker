@@ -1,6 +1,7 @@
 package com.nicolas.assettracker.domain.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,15 +24,19 @@ public class Asset {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(name = "tag_patrimonio", nullable = false, unique = true)
     private String tagPatrimonio;
 
+    @NotBlank
     @Column(nullable = false)
     private String nome;
 
+    @NotBlank
     @Column(nullable = false)
     private String tipo;
 
+    @NotBlank
     @Column(nullable = false)
     private String status;
 
