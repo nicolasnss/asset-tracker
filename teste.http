@@ -1,15 +1,1 @@
-### Cadastrar um novo notebook
-POST http://localhost:8080/api/assets
-Content-Type: application/json
-
-{
-  "tagPatrimonio": "TI-2026-001",
-  "nome": "Notebook Dell Latitude",
-  "tipo": "LAPTOP",
-  "status": "DISPONIVEL",
-  "dataAquisicao": "2026-03-20",
-  "descricao": "Equipamento novo recebido hoje"
-}
-
-### Listar todos os ativos
-GET http://localhost:8080/api/assets
+DELETE http://localhost:8080/api/assets/6

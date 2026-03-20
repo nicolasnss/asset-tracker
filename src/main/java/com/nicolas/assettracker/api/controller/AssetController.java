@@ -26,4 +26,30 @@ public class AssetController {
         Asset savedAsset = assetRepository.save(asset);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedAsset);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Asset> buscarPorId(@PathVariable Long id) {
+        return assetRepository.findById(id)
+                .map(asset -> ResponseEntity.ok(asset))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Asset> atualizar(@PathVariable Long id, @RequestBody Asset asset) {
+        if (!assetRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        asset.setId(id);
+        Asset savedAsset = assetRepository.save(asset);
+        return ResponseEntity.ok(savedAsset);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+        if (!assetRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        assetRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }
