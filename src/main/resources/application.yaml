@@ -3,9 +3,11 @@ spring:
     name: asset-tracker
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/asset_db
-    username: postgres
-    password: nico10
+    # Usamos o formato ${VARIAVEL:PADRAO}
+    # Se o Windows não tiver a variável, ele usa o valor após os dois pontos
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/asset_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:nico10}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -16,8 +18,8 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate # O Flyway cuidará da criação das tabelas
-    show-sql: true # Em produção, mude para false
+      ddl-auto: validate
+    show-sql: ${HIBERNATE_SHOW_SQL:true}
     properties:
       hibernate:
         format_sql: true
