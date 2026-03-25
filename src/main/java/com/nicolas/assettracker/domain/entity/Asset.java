@@ -1,5 +1,6 @@
 package com.nicolas.assettracker.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -44,6 +45,12 @@ public class Asset {
     private LocalDate dataAquisicao;
 
     private String descricao;
+
+    // Relacionamento Many-to-One com Funcionário (Cautela)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "funcionario_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Funcionario responsavel;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
