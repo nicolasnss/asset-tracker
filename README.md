@@ -1,19 +1,20 @@
 # 🏗️ Asset Tracker - Sistema de Gerenciamento de Ativos
 
-![Status](https://img.shields.io/badge/status-healthy-brightgreen)
 ![Java](https://img.shields.io/badge/java-17+-blue)
 ![Spring Boot](https://img.shields.io/badge/spring%20boot-3.2.4-brightgreen)
 ![Database](https://img.shields.io/badge/database-postgresql-336791)
 
 ## 📋 Visão Geral
 
-Asset Tracker é uma API REST desenvolvida em **Spring Boot 3.2.4** para gerenciamento centralizado de ativos de uma organização. O sistema permite criar, ler, atualizar e deletar registros de ativos, com suporte a busca por status e paginação.
+Asset Tracker é uma API REST desenvolvida em **Spring Boot 3.2.4** para gerenciamento centralizado de ativos e funcionários de uma organização. O sistema permite operações CRUD completas, com suporte a paginação, validações e tratamento padronizado de erros.
 
-### Tecnologias Stack
+### Tecnologias
 - **Backend:** Java 17, Spring Boot 3.2.4, Spring Data JPA
 - **Database:** PostgreSQL com Flyway para migrações
 - **Build:** Maven 3.8+
-- **Arquitetura:** REST API com camadas (Entity → Repository → Controller)
+
+### Arquitetura
+O projeto segue uma arquitetura em camadas (Entity → Repository → Controller), utilizando DTOs (Request/Response) para separação clara entre domínio e API, e um GlobalExceptionHandler para respostas de erro padronizadas.
 
 ---
 
@@ -23,298 +24,39 @@ Asset Tracker é uma API REST desenvolvida em **Spring Boot 3.2.4** para gerenci
 - Java 17 ou superior
 - PostgreSQL 12+
 - Maven 3.8+ (ou usar o Maven Wrapper fornecido)
-- Windows 10+ (para scripts de setup)
 
-### Setup Automático (Recomendado)
+### Configuração
+1. Configure as variáveis de ambiente para segurança:
+   ```bash
+   DB_URL=jdbc:postgresql://localhost:5432/asset_db
+   DB_USERNAME=seu_usuario
+   DB_PASSWORD=sua_senha_segura
+   ```
 
-```powershell
-# 1. Execute o script de setup (Windows PowerShell)
-.\setup-env.ps1
-
-# 2. Feche e reabra o PowerShell/IDE para carregar variáveis de ambiente
-
-# 3. Compile e execute
-.\mvnw clean compile
-.\mvnw spring-boot:run
-```
-
-### Setup Manual
-
-```bash
-# 1. Criar banco de dados PostgreSQL
-psql -U postgres -c "CREATE DATABASE asset_db;"
-
-# 2. Configurar variáveis de ambiente (Windows)
-[Environment]::SetEnvironmentVariable("DB_URL", "jdbc:postgresql://localhost:5432/asset_db", "User")
-[Environment]::SetEnvironmentVariable("DB_USERNAME", "postgres", "User")
-[Environment]::SetEnvironmentVariable("DB_PASSWORD", "sua_senha", "User")
-
-# 3. Compilar o projeto
-.\mvnw clean compile
-
-# 4. Executar a aplicação
-.\mvnw spring-boot:run
-```
+2. Compile e execute:
+   ```bash
+   .\mvnw clean compile
+   .\mvnw spring-boot:run
+   ```
 
 ---
 
 ## 📚 Endpoints da API
 
-### GET - Listar Assets com Paginação
-```bash
-curl "http://localhost:8080/api/assets?page=0&size=10&sort=nome,asc"
-```
+### Funcionários
+- **GET** `/api/funcionarios` - Listar todos os funcionários
+- **POST** `/api/funcionarios` - Criar novo funcionário
+- **DELETE** `/api/funcionarios/{id}` - Excluir funcionário (se não houver ativos vinculados)
 
-**Resposta (200 OK):**
-```json
-{
-  "content": [
-    {
-      "id": 1,
-      "tagPatrimonio": "TAG001",
-      "nome": "Notebook Dell",
-      "tipo": "Eletrônico",
-      "status": "Ativo",
-      "dataAquisicao": "2024-01-15",
-      "descricao": "Notebook para desenvolvimento",
-      "createdAt": "2024-01-15T10:30:00",
-      "updatedAt": "2024-01-15T10:30:00"
-    }
-  ],
-  "totalElements": 1,
-  "totalPages": 1,
-  "currentPage": 0,
-  "pageSize": 10
-}
-```
+### Ativos
+- **GET** `/api/assets` - Listar ativos com paginação (ex: `?page=0&size=10&sort=nome,asc`)
+- **POST** `/api/assets` - Criar novo ativo
+- **PATCH** `/api/assets/{id}/devolucao` - Devolver ativo (remove responsável e define status como DISPONIVEL)
 
 ---
 
-### POST - Criar Novo Asset
-```bash
-curl -X POST "http://localhost:8080/api/assets" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "tagPatrimonio": "TAG001",
-    "nome": "Notebook Dell",
-    "tipo": "Eletrônico",
-    "status": "Ativo",
-    "dataAquisicao": "2024-01-15",
-    "descricao": "Notebook para desenvolvimento"
-  }'
-```
-
-**Resposta (201 CREATED):**
-```json
-{
-  "id": 1,
-  "tagPatrimonio": "TAG001",
-  "nome": "Notebook Dell",
-  "tipo": "Eletrônico",
-  "status": "Ativo",
-  "dataAquisicao": "2024-01-15",
-  "descricao": "Notebook para desenvolvimento",
-  "createdAt": "2024-01-15T10:30:00",
-  "updatedAt": "2024-01-15T10:30:00"
-}
-```
-
----
-
-### GET - Buscar Asset por ID
-```bash
-curl "http://localhost:8080/api/assets/1"
-```
-
-**Resposta (200 OK):**
-```json
-{
-  "id": 1,
-  "tagPatrimonio": "TAG001",
-  "nome": "Notebook Dell",
-  "tipo": "Eletrônico",
-  "status": "Ativo",
-  "dataAquisicao": "2024-01-15",
-  "descricao": "Notebook para desenvolvimento",
-  "createdAt": "2024-01-15T10:30:00",
-  "updatedAt": "2024-01-15T10:30:00"
-}
-```
-
-**Se não encontrado (404 NOT FOUND):**
-```json
-(Resposta vazia)
-```
-
----
-
-### PUT - Atualizar Asset
-```bash
-curl -X PUT "http://localhost:8080/api/assets/1" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "tagPatrimonio": "TAG001",
-    "nome": "Notebook Dell XPS",
-    "tipo": "Eletrônico",
-    "status": "Manutenção",
-    "dataAquisicao": "2024-01-15",
-    "descricao": "Notebook atualizado para manutenção"
-  }'
-```
-
-**Resposta (200 OK):**
-```json
-{
-  "id": 1,
-  "tagPatrimonio": "TAG001",
-  "nome": "Notebook Dell XPS",
-  "tipo": "Eletrônico",
-  "status": "Manutenção",
-  "dataAquisicao": "2024-01-15",
-  "descricao": "Notebook atualizado para manutenção",
-  "createdAt": "2024-01-15T10:30:00",
-  "updatedAt": "2024-01-15T11:45:00"
-}
-```
-
----
-
-### DELETE - Deletar Asset
-```bash
-curl -X DELETE "http://localhost:8080/api/assets/1"
-```
-
-**Resposta (204 NO CONTENT):**
-```
-(Sem corpo de resposta)
-```
-
----
-
-### GET - Filtrar por Status
-```bash
-curl "http://localhost:8080/api/assets/status/Ativo"
-```
-
-**Resposta (200 OK):**
-```json
-[
-  {
-    "id": 1,
-    "tagPatrimonio": "TAG001",
-    "nome": "Notebook Dell",
-    "tipo": "Eletrônico",
-    "status": "Ativo",
-    "dataAquisicao": "2024-01-15",
-    "descricao": "Notebook para desenvolvimento",
-    "createdAt": "2024-01-15T10:30:00",
-    "updatedAt": "2024-01-15T10:30:00"
-  }
-]
-```
-
----
-
-## ❌ Tratamento de Erros
-
-### Erro de Validação (400 BAD REQUEST)
-```bash
-curl -X POST "http://localhost:8080/api/assets" \
-  -H "Content-Type: application/json" \
-  -d '{"nome": "", "tipo": ""}' # Faltam campos obrigatórios
-```
-
-**Resposta (400):**
-```json
-{
-  "tagPatrimonio": "O campo tagPatrimonio não pode ser vazio",
-  "nome": "O campo nome não pode ser vazio",
-  "tipo": "O campo tipo não pode ser vazio",
-  "status": "O campo status não pode ser vazio"
-}
-```
-
-### Recurso Não Encontrado (404 NOT FOUND)
-```bash
-curl "http://localhost:8080/api/assets/999"
-```
-
-**Resposta (404):**
-```
-(Sem corpo de resposta)
-```
-
----
-
-## 🗄️ Modelo de Dados
-
-### Tabela: `assets`
-
-| Campo | Tipo | Restrições | Descrição |
-|-------|------|-----------|-----------|
-| `id` | BIGSERIAL | PRIMARY KEY | Identificador único |
-| `tag_patrimonio` | VARCHAR(50) | NOT NULL, UNIQUE | Tag/código do patrimônio |
-| `nome` | VARCHAR(255) | NOT NULL | Nome do ativo |
-| `tipo` | VARCHAR(100) | NOT NULL | Tipo/categoria do ativo |
-| `status` | VARCHAR(50) | NOT NULL | Status do ativo |
-| `data_aquisicao` | DATE | NULLABLE | Data de aquisição |
-| `descricao` | TEXT | NULLABLE | Descrição detalhada |
-| `created_at` | TIMESTAMP | DEFAULT NOW() | Timestamp de criação |
-| `updated_at` | TIMESTAMP | DEFAULT NOW() | Timestamp de atualização |
-
-### Índices
-- `idx_assets_tag_patrimonio` - Busca rápida por tag
-- `idx_assets_status` - Busca rápida por status
-
-### Trigger
-- `trigger_update_assets_updated_at` - Atualiza `updated_at` automaticamente em modificações
-
----
-
-## 🔐 Segurança e Configuração
-
-### Variáveis de Ambiente Obrigatórias
-
-```bash
-# Database
-DB_URL=jdbc:postgresql://localhost:5432/asset_db
-DB_USERNAME=postgres
-DB_PASSWORD=sua_senha_segura
-
-# JPA/Hibernate
-HIBERNATE_SHOW_SQL=true
-HIBERNATE_FORMAT_SQL=true
-
-# Application
-SPRING_PROFILES_ACTIVE=dev
-```
-
-### ⚠️ IMPORTANTE - Segurança de Credenciais
-
-**NUNCA** faça commit de senhas em `application.yaml`:
-
-```yaml
-# ❌ NUNCA faça isso:
-datasource:
-  password: ${DB_PASSWORD:nico10}
-
-# ✅ FAÇA ISSO em produção:
-datasource:
-  password: ${DB_PASSWORD}  # Sem valor padrão, força variável de ambiente
-```
-
-### Configuração por Perfil
-
-```bash
-# Desenvolvimento
-SPRING_PROFILES_ACTIVE=dev
-HIBERNATE_SHOW_SQL=true
-HIBERNATE_FORMAT_SQL=true
-
-# Produção
-SPRING_PROFILES_ACTIVE=prod
-HIBERNATE_SHOW_SQL=false
-```
+## 🔐 Segurança
+O projeto utiliza variáveis de ambiente para proteger credenciais sensíveis. Nunca faça commit de senhas no código. Configure `DB_URL`, `DB_USERNAME` e `DB_PASSWORD` no ambiente de execução.
 
 ---
 
@@ -328,25 +70,33 @@ asset-tracker/
 │   │   │   ├── AssetTrackerApplication.java
 │   │   │   ├── api/
 │   │   │   │   ├── controller/
-│   │   │   │   │   └── AssetController.java
+│   │   │   │   │   ├── AssetController.java
+│   │   │   │   │   └── FuncionarioController.java
+│   │   │   │   ├── dto/
+│   │   │   │   │   ├── AssetRequestDTO.java
+│   │   │   │   │   ├── AssetResponseDTO.java
+│   │   │   │   │   ├── FuncionarioRequestDTO.java
+│   │   │   │   │   └── FuncionarioResponseDTO.java
 │   │   │   │   └── exception/
 │   │   │   │       └── GlobalExceptionHandler.java
 │   │   │   └── domain/
 │   │   │       ├── entity/
-│   │   │       │   └── Asset.java
+│   │   │       │   ├── Asset.java
+│   │   │       │   └── Funcionario.java
 │   │   │       └── repository/
-│   │   │           └── AssetRepository.java
+│   │   │           ├── AssetRepository.java
+│   │   │           └── FuncionarioRepository.java
 │   │   └── resources/
 │   │       ├── application.yaml
 │   │       └── db/migration/
-│   │           └── V1__create_table_assets.sql
+│   │           ├── V1__create_table_assets.sql
+│   │           ├── V2__create_table_funcionarios.sql
+│   │           └── V3__add_funcionario_to_assets.sql
 │   └── test/
 │       └── java/.../AssetTrackerApplicationTests.java
 ├── pom.xml
 ├── mvnw / mvnw.cmd
-├── HEALTH_CHECK_REPORT.md
-├── README.md
-└── setup-env.ps1
+└── README.md
 ```
 
 ---
@@ -378,56 +128,16 @@ java -jar target/asset-tracker-0.0.1-SNAPSHOT.jar
 
 ## 🐛 Troubleshooting
 
-### Erro: "Connection to localhost:5432 refused"
-```bash
-# Verificar se PostgreSQL está rodando
-psql -U postgres -h localhost
+### Conexão com PostgreSQL
+- Verifique se o PostgreSQL está rodando e acessível na porta 5432.
+- Certifique-se de que o banco `asset_db` existe.
 
-# Se não estiver, inicie o serviço:
-net start postgresql-x64-15  # Windows
+### Variáveis de Ambiente
+- Configure todas as variáveis necessárias (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`).
+- Reinicie o terminal/IDE após configurar.
 
-# Ou use Docker:
-docker run -d --name postgres \
-  -e POSTGRES_PASSWORD=nico10 \
-  -p 5432:5432 \
-  postgres:15-alpine
-```
-
-### Erro: "Database asset_db does not exist"
-```bash
-# Criar banco de dados
-psql -U postgres -c "CREATE DATABASE asset_db;"
-```
-
-### Erro: "Variável de ambiente não definida"
-```bash
-# Windows PowerShell - Configurar variáveis
-[Environment]::SetEnvironmentVariable("DB_PASSWORD", "sua_senha", "User")
-
-# Verificar se foi definida
-[Environment]::GetEnvironmentVariable("DB_PASSWORD", "User")
-
-# Fechar e reabrir PowerShell/IDE para aplicar
-```
-
-### Porta 8080 já em uso
-```bash
-# Encontrar processo usando a porta
-netstat -ano | findstr :8080
-
-# Matar o processo (ex: PID 1234)
-taskkill /PID 1234 /F
-
-# Ou alterar a porta em application.yaml
-server.port=8081
-```
-
----
-
-## 📖 Documentação Adicional
-
-- **[HEALTH_CHECK_REPORT.md](./HEALTH_CHECK_REPORT.md)** - Diagnóstico completo de integridade do projeto
-- **[.env.example](./.env.example)** - Exemplo de arquivo de variáveis de ambiente
+### Porta 8080 em Uso
+- Altere a porta em `application.yaml` se necessário: `server.port=8081`
 
 ---
 
@@ -440,17 +150,12 @@ server.port=8081
 
 ---
 
-## 📝 Licença
+## 👨‍💻 Autor
 
-Este projeto é propriedade da organização e está sob desenvolvimento ativo.
+Este projeto foi desenvolvido por **Nicolas**.
 
 ---
 
-## 👨‍💻 Desenvolvedor Sênior - Diagnóstico
+## 📝 Licença
 
-**Data:** 24 de Março de 2026  
-**Status:** ✅ Saudável  
-**Próximos Passos:** Implementar Actuator, melhorar tratamento de exceções, adicionar testes
-
-Para mais detalhes técnicos, consulte **HEALTH_CHECK_REPORT.md**
-
+Este projeto é propriedade da organização e está sob desenvolvimento ativo.

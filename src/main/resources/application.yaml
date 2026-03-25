@@ -3,11 +3,10 @@ spring:
     name: asset-tracker
 
   datasource:
-    # Usamos o formato ${VARIAVEL:PADRAO}
-    # Se o Windows não tiver a variável, ele usa o valor após os dois pontos
+    # A URL mantém um fallback para o padrão local, mas User e Password ficam protegidos
     url: ${DB_URL:jdbc:postgresql://localhost:5432/asset_db}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:nico10}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -19,6 +18,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    # Em produção (CNMP), você pode setar essa variável como 'false' para não poluir os logs
     show-sql: ${HIBERNATE_SHOW_SQL:true}
     properties:
       hibernate:
@@ -29,3 +29,9 @@ spring:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
+
+# Configuração extra para o Swagger (Opcional, mas ajuda na organização)
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
