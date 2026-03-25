@@ -42,3 +42,18 @@ out/
 ### System Files ###
 .DS_Store
 Thumbs.db
+
+# IDEs e Ferramentas
+.idea/
+*.http
+
+# Scripts e Relatórios Locais
+*.ps1
+HEALTH_CHECK_REPORT.md
+SUMARIO_EXECUTIVO.md
+QUICK_START.md
+TROUBLESHOOTING.md
+
+# Logs e Temporários
+*.log
+target/

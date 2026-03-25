@@ -1,9 +1,0 @@
-POST http://localhost:8080/api/assets
-Content-Type: application/json
-
-{
-  "tagPatrimonio": "",
-  "nome": "",
-  "tipo": "LAPTOP",
-  "status": "DISPONIVEL"
-}
