@@ -16,14 +16,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/assets")
-@RequiredArgsConstructor // Cria o construtor para o AssetService automaticamente
+@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200") // LIBERA O ACESSO PARA O SEU ANGULAR
 public class AssetController {
 
     private final AssetService assetService;
 
     @PostMapping
     public ResponseEntity<AssetResponseDTO> cadastrar(@RequestBody @Valid AssetRequestDTO dto) {
-        // Toda a lógica de conversão e busca de funcionário agora acontece no Service
         Asset assetSalvo = assetService.salvar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(assetService.toResponseDTO(assetSalvo));
     }
@@ -41,6 +41,7 @@ public class AssetController {
 
     @GetMapping("/dashboard")
     public ResponseEntity<Map<String, Long>> obterDashboard() {
+        // Agora o Angular conseguirá chamar este endpoint sem erro de CORS
         return ResponseEntity.ok(assetService.gerarDashboard());
     }
 }
