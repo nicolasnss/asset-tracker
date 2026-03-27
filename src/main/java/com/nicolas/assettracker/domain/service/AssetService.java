@@ -13,6 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +25,8 @@ public class AssetService {
 
     private final AssetRepository assetRepository;
     private final FuncionarioRepository funcionarioRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(AssetService.class);
 
     // 1. Salvar novo Ativo (Ajustado para setResponsavel)
     public Asset salvar(AssetRequestDTO dto) {
@@ -41,7 +46,40 @@ public class AssetService {
             asset.setResponsavel(func);
         }
 
+        logger.info("Salvando ativo: {}", asset);
         return assetRepository.save(asset);
+    }
+
+    // 1.5. Atualizar Ativo Existente
+    public Asset atualizar(Long id, AssetRequestDTO dto) {
+        Asset asset = assetRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ativo não encontrado: " + id));
+
+        asset.setTagPatrimonio(dto.getTagPatrimonio());
+        asset.setNome(dto.getNome());
+        asset.setTipo(dto.getTipo());
+        asset.setStatus(dto.getStatus());
+        asset.setDescricao(dto.getDescricao());
+
+        if (dto.getFuncionarioId() != null) {
+            Funcionario func = funcionarioRepository.findById(dto.getFuncionarioId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado"));
+            asset.setResponsavel(func);
+        } else {
+            asset.setResponsavel(null);
+        }
+
+        logger.info("Atualizando ativo: {}", asset);
+        return assetRepository.save(asset);
+    }
+
+    // 1.7. Deletar Ativo
+    public void deletar(Long id) {
+        Asset asset = assetRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ativo não encontrado: " + id));
+
+        logger.info("Deletando ativo: {}", asset.getTagPatrimonio());
+        assetRepository.delete(asset);
     }
 
     // 2. Listar todos com Paginação

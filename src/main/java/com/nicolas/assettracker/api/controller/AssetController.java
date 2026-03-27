@@ -27,6 +27,18 @@ public class AssetController {
         return ResponseEntity.status(HttpStatus.CREATED).body(assetService.toResponseDTO(assetSalvo));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<AssetResponseDTO> atualizar(@PathVariable Long id, @RequestBody @Valid AssetRequestDTO dto) {
+        Asset assetAtualizado = assetService.atualizar(id, dto);
+        return ResponseEntity.ok(assetService.toResponseDTO(assetAtualizado));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        assetService.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
     public ResponseEntity<Page<AssetResponseDTO>> listar(Pageable pageable) {
         Page<AssetResponseDTO> pagina = assetService.listarTodos(pageable);
