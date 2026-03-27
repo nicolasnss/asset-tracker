@@ -17,7 +17,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/assets")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200") // LIBERA O ACESSO PARA O SEU ANGULAR
 public class AssetController {
 
     private final AssetService assetService;
