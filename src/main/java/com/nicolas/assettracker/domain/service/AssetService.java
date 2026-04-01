@@ -1,21 +1,30 @@
 package com.nicolas.assettracker.domain.service;
 
 import com.nicolas.assettracker.api.dto.AssetRequestDTO;
+<<<<<<< HEAD
 import com.nicolas.assettracker.api.dto.AssetResponseDTO;
+=======
+>>>>>>> ef8d7a4 (fix: configurando CORS global e preparando endpoint de dashboard)
 import com.nicolas.assettracker.domain.entity.Asset;
 import com.nicolas.assettracker.domain.entity.Funcionario;
 import com.nicolas.assettracker.domain.repository.AssetRepository;
 import com.nicolas.assettracker.domain.repository.FuncionarioRepository;
 import lombok.RequiredArgsConstructor;
+<<<<<<< HEAD
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+=======
+>>>>>>> ef8d7a4 (fix: configurando CORS global e preparando endpoint de dashboard)
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+<<<<<<< HEAD
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+=======
+>>>>>>> ef8d7a4 (fix: configurando CORS global e preparando endpoint de dashboard)
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +35,7 @@ public class AssetService {
     private final AssetRepository assetRepository;
     private final FuncionarioRepository funcionarioRepository;
 
+<<<<<<< HEAD
     private static final Logger logger = LoggerFactory.getLogger(AssetService.class);
 
     // 1. Salvar novo Ativo (Ajustado para setResponsavel)
@@ -55,12 +65,30 @@ public class AssetService {
         Asset asset = assetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ativo não encontrado: " + id));
 
+=======
+    public Map<String, Object> getDashboardStats() {
+        long total = assetRepository.count();
+        long disponivel = assetRepository.countByStatus("DISPONIVEL");
+        long emUso = total - disponivel;
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("total_ativos", total);
+        stats.put("disponivel", disponivel);
+        stats.put("em_uso", emUso);
+
+        return stats;
+    }
+
+    public Asset salvarAtivo(AssetRequestDTO dto) {
+        Asset asset = new Asset();
+>>>>>>> ef8d7a4 (fix: configurando CORS global e preparando endpoint de dashboard)
         asset.setTagPatrimonio(dto.getTagPatrimonio());
         asset.setNome(dto.getNome());
         asset.setTipo(dto.getTipo());
         asset.setStatus(dto.getStatus());
         asset.setDescricao(dto.getDescricao());
 
+<<<<<<< HEAD
         if (dto.getFuncionarioId() != null) {
             Funcionario func = funcionarioRepository.findById(dto.getFuncionarioId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado"));
@@ -127,3 +155,18 @@ public class AssetService {
         return dto;
     }
 }
+=======
+        // Se um funcionarioId foi informado, busca o funcionário e o atribui ao ativo
+        if (dto.getFuncionarioId() != null && dto.getFuncionarioId() > 0) {
+            Funcionario funcionario = funcionarioRepository.findById(dto.getFuncionarioId())
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND, 
+                            "Funcionário com ID " + dto.getFuncionarioId() + " não encontrado"
+                    ));
+            asset.setResponsavel(funcionario);
+        }
+
+        return assetRepository.save(asset);
+    }
+}
+>>>>>>> ef8d7a4 (fix: configurando CORS global e preparando endpoint de dashboard)
