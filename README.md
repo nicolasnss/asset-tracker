@@ -152,7 +152,7 @@ java -jar target/asset-tracker-0.0.1-SNAPSHOT.jar
 
 ## 👨‍💻 Autor
 
-Este projeto foi desenvolvido por **Nicolas**.
+Este projeto foi desenvolvido por **Nícolas Sousa e Silva**.
 
 ---
 

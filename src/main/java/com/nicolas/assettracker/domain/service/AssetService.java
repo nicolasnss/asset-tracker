@@ -1,30 +1,21 @@
 package com.nicolas.assettracker.domain.service;
 
 import com.nicolas.assettracker.api.dto.AssetRequestDTO;
-<<<<<<< HEAD
 import com.nicolas.assettracker.api.dto.AssetResponseDTO;
-=======
->>>>>>> ef8d7a4 (fix: configurando CORS global e preparando endpoint de dashboard)
 import com.nicolas.assettracker.domain.entity.Asset;
 import com.nicolas.assettracker.domain.entity.Funcionario;
 import com.nicolas.assettracker.domain.repository.AssetRepository;
 import com.nicolas.assettracker.domain.repository.FuncionarioRepository;
 import lombok.RequiredArgsConstructor;
-<<<<<<< HEAD
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-=======
->>>>>>> ef8d7a4 (fix: configurando CORS global e preparando endpoint de dashboard)
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-<<<<<<< HEAD
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-=======
->>>>>>> ef8d7a4 (fix: configurando CORS global e preparando endpoint de dashboard)
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,12 +26,16 @@ public class AssetService {
     private final AssetRepository assetRepository;
     private final FuncionarioRepository funcionarioRepository;
 
-<<<<<<< HEAD
     private static final Logger logger = LoggerFactory.getLogger(AssetService.class);
 
-    // 1. Salvar novo Ativo (Ajustado para setResponsavel)
+    // Salvar novo Ativo
     public Asset salvar(AssetRequestDTO dto) {
-        Asset asset = Asset.builder() // Usando o @Builder que você tem na Entity
+        // Verificar unicidade da tag de patrimônio
+        if (assetRepository.findByTagPatrimonio(dto.getTagPatrimonio()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tag de patrimônio já existe");
+        }
+
+        Asset asset = Asset.builder()
                 .tagPatrimonio(dto.getTagPatrimonio())
                 .nome(dto.getNome())
                 .tipo(dto.getTipo())
@@ -51,8 +46,6 @@ public class AssetService {
         if (dto.getFuncionarioId() != null) {
             Funcionario func = funcionarioRepository.findById(dto.getFuncionarioId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado"));
-
-            // Aqui estava o erro: o nome correto é setResponsavel
             asset.setResponsavel(func);
         }
 
@@ -60,35 +53,22 @@ public class AssetService {
         return assetRepository.save(asset);
     }
 
-    // 1.5. Atualizar Ativo Existente
+    // Atualizar Ativo Existente
     public Asset atualizar(Long id, AssetRequestDTO dto) {
         Asset asset = assetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ativo não encontrado: " + id));
 
-=======
-    public Map<String, Object> getDashboardStats() {
-        long total = assetRepository.count();
-        long disponivel = assetRepository.countByStatus("DISPONIVEL");
-        long emUso = total - disponivel;
+        // Verificar unicidade da tag de patrimônio se ela mudou
+        if (!asset.getTagPatrimonio().equals(dto.getTagPatrimonio()) && assetRepository.findByTagPatrimonio(dto.getTagPatrimonio()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tag de patrimônio já existe");
+        }
 
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("total_ativos", total);
-        stats.put("disponivel", disponivel);
-        stats.put("em_uso", emUso);
-
-        return stats;
-    }
-
-    public Asset salvarAtivo(AssetRequestDTO dto) {
-        Asset asset = new Asset();
->>>>>>> ef8d7a4 (fix: configurando CORS global e preparando endpoint de dashboard)
         asset.setTagPatrimonio(dto.getTagPatrimonio());
         asset.setNome(dto.getNome());
         asset.setTipo(dto.getTipo());
         asset.setStatus(dto.getStatus());
         asset.setDescricao(dto.getDescricao());
 
-<<<<<<< HEAD
         if (dto.getFuncionarioId() != null) {
             Funcionario func = funcionarioRepository.findById(dto.getFuncionarioId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado"));
@@ -101,7 +81,7 @@ public class AssetService {
         return assetRepository.save(asset);
     }
 
-    // 1.7. Deletar Ativo
+    // Deletar Ativo
     public void deletar(Long id) {
         Asset asset = assetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ativo não encontrado: " + id));
@@ -110,31 +90,33 @@ public class AssetService {
         assetRepository.delete(asset);
     }
 
-    // 2. Listar todos com Paginação
+    // Listar todos com Paginação
     public Page<AssetResponseDTO> listarTodos(Pageable pageable) {
         return assetRepository.findAll(pageable).map(this::toResponseDTO);
     }
 
-    // 3. Buscar por Tag de Patrimônio
+    // Buscar por Tag de Patrimônio
     public AssetResponseDTO buscarPorTag(String tag) {
         Asset asset = assetRepository.findByTagPatrimonio(tag)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patrimônio não localizado: " + tag));
         return toResponseDTO(asset);
     }
 
-    // 4. Gerar dados do Dashboard
+    // Gerar dados do Dashboard
     public Map<String, Long> gerarDashboard() {
         Map<String, Long> stats = new HashMap<>();
-        stats.put("total_ativos", assetRepository.count());
+        long total = assetRepository.count();
+        long disponivel = assetRepository.countByStatus("DISPONIVEL");
+        long emUso = total - disponivel;
 
-        // Ajuste os nomes de status conforme o seu uso no banco
-        stats.put("disponivel", assetRepository.countByStatus("Disponível"));
-        stats.put("em_uso", assetRepository.countByStatus("Em Uso"));
+        stats.put("total_ativos", total);
+        stats.put("disponivel", disponivel);
+        stats.put("em_uso", emUso);
 
         return stats;
     }
 
-    // 5. Método Auxiliar: Converte Entidade para DTO de Resposta
+    // Método Auxiliar: Converte Entidade para DTO de Resposta
     public AssetResponseDTO toResponseDTO(Asset asset) {
         AssetResponseDTO dto = new AssetResponseDTO();
         dto.setId(asset.getId());
@@ -146,7 +128,6 @@ public class AssetService {
         dto.setCreatedAt(asset.getCreatedAt());
         dto.setUpdatedAt(asset.getUpdatedAt());
 
-        // Ajustado para getResponsavel()
         if (asset.getResponsavel() != null) {
             dto.setNomeResponsavel(asset.getResponsavel().getNome());
         } else {
@@ -155,18 +136,3 @@ public class AssetService {
         return dto;
     }
 }
-=======
-        // Se um funcionarioId foi informado, busca o funcionário e o atribui ao ativo
-        if (dto.getFuncionarioId() != null && dto.getFuncionarioId() > 0) {
-            Funcionario funcionario = funcionarioRepository.findById(dto.getFuncionarioId())
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.NOT_FOUND, 
-                            "Funcionário com ID " + dto.getFuncionarioId() + " não encontrado"
-                    ));
-            asset.setResponsavel(funcionario);
-        }
-
-        return assetRepository.save(asset);
-    }
-}
->>>>>>> ef8d7a4 (fix: configurando CORS global e preparando endpoint de dashboard)
